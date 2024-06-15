@@ -14,9 +14,9 @@ export const chartConfig: ChartConfiguration['options'] = {
       alignToPixels: true,
       time: {
         unit: 'minute',
-        tooltipFormat: 'YYYY-MM-DD HH:mm',
+        tooltipFormat: 'yyyy-MM-dd HH:mm',
         displayFormats: {
-          minute: 'YYYY-MM-DD HH:mm',
+          minute: 'yyyy-MM-dd HH:mm',
         },
         round: 'minute',
       },
