@@ -14,7 +14,7 @@ export class ExchangeRateApiServiceService {
 
   public getHistoricalData(exchangePair: string): Observable<IExchangeRate[]> {
     return this.httpClient.get<IExchangeRate[]>(
-      'https://rest.coinapi.io/v1/exchangerate/BTC/USD/history?period_id=1HRS'
+      `https://rest.coinapi.io/v1/exchangerate/${exchangePair}/history?period_id=1HRS`
     )
   }
 }

@@ -1,63 +1,69 @@
-@if (isLoading$ | async) {
-  <div class="loading-overlay">
-    <mat-spinner diameter="50"/>
-  </div>
-}
+@if ({
+  isLoading: isLoading$ | async,
+  exchangeRatesArePresent: exchangeRatesArePresent$ | async,
+  lastExchangeRate: lastExchangeRate$ | async
+}; as data) {
 
-<div class="container gap-5 d-flex flex-column p-5">
-  <div class="d-flex align-items-center column-gap-3">
-    <mat-form-field class="w-100" subscriptSizing="dynamic">
-      <mat-label>Enter exchange pair</mat-label>
+  @if (data.isLoading) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="50"/>
+    </div>
+  }
 
-      <input matInput [formControl]="exchangePair"/>
+  <div class="container gap-5 d-flex flex-column p-5">
+    <div class="d-flex align-items-center column-gap-3">
+      <mat-form-field class="w-100" subscriptSizing="dynamic">
+        <mat-label>Enter exchange pair</mat-label>
 
-      @if (exchangePair.hasError('required')) {
-        <mat-error>This field is required</mat-error>
-      }
+        <input matInput [formControl]="exchangePairControl"/>
 
-      @if (exchangePair.hasError('pattern')) {
-        <mat-error>Wrong format</mat-error>
-      }
+        @if (exchangePairControl.hasError('required')) {
+          <mat-error>This field is required</mat-error>
+        }
 
-    </mat-form-field>
+        @if (exchangePairControl.hasError('pattern')) {
+          <mat-error>Wrong format</mat-error>
+        }
+      </mat-form-field>
 
-    <button mat-flat-button [disabled]="exchangePair.invalid" (click)="subscribeForEvents()">SUBSCRIBE</button>
-  </div>
+      <button mat-flat-button [disabled]="exchangePairControl.invalid" (click)="subscribeForEvents()">SUBSCRIBE</button>
+    </div>
 
-  <div class="d-flex flex-column gap-3">
-    <mat-card-title>Market data:</mat-card-title>
+    <div class="d-flex flex-column gap-3">
+      <mat-card-title>Market data:</mat-card-title>
+
+      <mat-card>
+        <mat-card-content class="d-flex justify-content-between px-5">
+          <div class="d-flex flex-column align-items-center">
+            <mat-card-title>Symbol:</mat-card-title>
+
+            <mat-card-subtitle>{{ pair() }}</mat-card-subtitle>
+          </div>
+
+          <div class="d-flex flex-column align-items-center">
+            <mat-card-title>Price:</mat-card-title>
+
+            <mat-card-subtitle>{{ data.lastExchangeRate?.rate_close | currency: currency() }}</mat-card-subtitle>
+          </div>
+
+          <div class="d-flex flex-column align-items-center">
+            <mat-card-title>Time:</mat-card-title>
+
+            <mat-card-subtitle>{{ data.lastExchangeRate?.time_close | date: displayDateFormat }}</mat-card-subtitle>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
 
     <mat-card>
-      <mat-card-content class="d-flex justify-content-between px-5">
-        <div class="d-flex flex-column align-items-center">
-          <mat-card-title>Symbol:</mat-card-title>
-
-          <mat-card-subtitle>Market data:</mat-card-subtitle>
-        </div>
-
-        <div class="d-flex flex-column align-items-center">
-          <mat-card-title>Price:</mat-card-title>
-
-          <mat-card-subtitle>Market data:</mat-card-subtitle>
-        </div>
-
-        <div class="d-flex flex-column align-items-center">
-          <mat-card-title>Time:</mat-card-title>
-
-          <mat-card-subtitle>Market data:</mat-card-subtitle>
+      <mat-card-content>
+        <div class="chart-container d-flex justify-content-center align-items-center">
+          <canvas #chartCanvas [hidden]="!data.exchangeRatesArePresent"></canvas>
+          @if (!data.exchangeRatesArePresent) {
+            <mat-card-subtitle>There are no data to display</mat-card-subtitle>
+          }
         </div>
       </mat-card-content>
     </mat-card>
   </div>
-
-  <mat-card>
-    <mat-card-content>
-      <div class="chart-container">
-        <canvas #chartCanvas></canvas>
-      </div>
-    </mat-card-content>
-  </mat-card>
-</div>
-
-
-
+}

@@ -7,6 +7,7 @@ import {
   LineController,
   LineElement,
   PointElement,
+  Tooltip,
 } from 'chart.js';
 import { routes } from './app.routes';
 import { provideState, provideStore } from '@ngrx/store';
@@ -45,4 +46,5 @@ Chart.register(
   LineController,
   PointElement,
   LineElement,
+  Tooltip,
 );

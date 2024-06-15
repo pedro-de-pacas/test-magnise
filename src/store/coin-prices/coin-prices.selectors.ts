@@ -14,3 +14,13 @@ export const selectExchangeRates = createSelector(
   selectCoinPricesState,
   (state: ICoinPricesState) => state.exchangeRates,
 );
+
+export const selectExchangeRatesArePresent = createSelector(
+  selectExchangeRates,
+  (rates) => !!rates && rates.length > 0,
+);
+
+export const selectLastExchangeRate = createSelector(
+  selectExchangeRates,
+  (rates) => (!!rates && rates.length > 0) ? rates.slice(-1)[0] : null,
+);
