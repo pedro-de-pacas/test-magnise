@@ -26,7 +26,7 @@ import {
   selectExchangeRatesArePresent,
   selectLastExchangeRate,
 } from '../store/coin-prices/coin-prices.selectors';
-import { AsyncPipe, CurrencyPipe, DatePipe, DecimalPipe, KeyValue, KeyValuePipe } from '@angular/common';
+import { AsyncPipe, CurrencyPipe, DatePipe, DecimalPipe, KeyValuePipe } from '@angular/common';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
@@ -69,6 +69,7 @@ export class AppComponent implements AfterViewInit {
   private chart: Chart | null = null;
 
   public displayDateFormat = 'MMM d, hh:mm:ss a';
+  public PeriodsEnum = PeriodsEnum;
 
   public exchangePairControl = new FormControl('BTC/USD', {
     validators: [
@@ -141,15 +142,5 @@ export class AppComponent implements AfterViewInit {
       }));
   }
 
-  public sortFunc = (a: KeyValue<string, PeriodsEnum>, b: KeyValue<string, PeriodsEnum>,): number => {
-    const unitA = a.value.slice(-3);
-    const numA = a.value.slice(0, -3);
-
-    const unitB = b.value.slice(-3);
-    const numB = b.value.slice(0, -3);
-
-    return ((unitB < unitA) && (numA < numB)) ? -1 : 1;
-  }
-
-  protected readonly PeriodsEnum = PeriodsEnum;
+  public sortPeriodFunc = (): number => 0;
 }

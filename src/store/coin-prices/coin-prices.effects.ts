@@ -7,11 +7,10 @@ import {
   getHistoricalDataSuccess,
   startWebsocket,
 } from './coin-prices.actions';
-import { catchError, map, Observer, of, switchMap, tap } from 'rxjs';
+import { catchError, map, of, switchMap, throttleTime } from 'rxjs';
 import { ExchangeRateApiService } from '../../api/services/exchange-rate-api.service';
 import { CoinApiWebsocketService } from '../../api/services/coin-api-websocket.service';
-import { IWebSocketExchangeRate } from '../../api/models/coin-api.models';
-import { Store } from '@ngrx/store';
+import { periodNumbers } from '../../configs/api-periods.config';
 
 export const getHistoricalData$: FunctionalEffect = createEffect((
   actions$: Actions = inject(Actions),
@@ -43,24 +42,17 @@ export const startWebsocketOnGetHistoricalDataSuccess$: FunctionalEffect = creat
 export const startWebsocket$: FunctionalEffect = createEffect((
   actions$: Actions = inject(Actions),
   coinApiWebsocketService: CoinApiWebsocketService = inject(CoinApiWebsocketService),
-  store: Store = inject(Store),
 ) => {
-  const observer: Observer<IWebSocketExchangeRate> = {
-    next: (exchangeRate) => {
-      if (exchangeRate.message) {
-        store.dispatch(coinPricesError({ error: exchangeRate.message }));
-
-        return;
-      }
-      store.dispatch(addRealtimeData({ exchangeRate: { date: exchangeRate.time, value: exchangeRate.rate } }));
-    },
-    error: ({ error }) => store.dispatch(coinPricesError({ error })),
-    complete: () => store.dispatch(coinPricesError({ error: 'Websocket completed' })),
-  };
-
   return actions$.pipe(
     ofType(startWebsocket),
-    tap(({ exchangePair, period }) =>
-      coinApiWebsocketService.subscribeToCoinWebSocket(exchangePair, period, observer)),
+    switchMap(({ exchangePair, period }) =>
+      coinApiWebsocketService.getCoinWebSocketObservable(exchangePair, period).pipe(
+        throttleTime(periodNumbers[period]! - 999),
+        map((exchangeRate) => exchangeRate.message
+          ? coinPricesError({ error: exchangeRate.message })
+          : addRealtimeData({ exchangeRate: { date: exchangeRate.time, value: exchangeRate.rate } })
+        ),
+      ),
+    ),
   );
-}, { functional: true, dispatch: false });
+}, { functional: true });
