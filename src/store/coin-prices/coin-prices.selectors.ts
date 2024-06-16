@@ -22,5 +22,10 @@ export const selectExchangeRatesArePresent = createSelector(
 
 export const selectLastExchangeRate = createSelector(
   selectExchangeRates,
-  (rates) => (!!rates && rates.length > 0) ? rates.slice(-1)[0] : null,
+  (rates) => rates ? rates[0] : null,
+);
+
+export const selectError = createSelector(
+  selectCoinPricesState,
+  (state) => state.error,
 );

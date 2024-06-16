@@ -15,7 +15,7 @@ import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { keyInterceptor } from '../auth/interceprors/key-interceptor';
+import { apiKeyInterceptor } from '../auth/api-key.interceptor';
 import { coinPricesKey } from '../store/coin-prices/coin-prices.state';
 import { coinPricesReducer } from '../store/coin-prices/coin-prices.reducer';
 import * as coinPricesEffects from '../store/coin-prices/coin-prices.effects';
@@ -31,7 +31,7 @@ export const appConfig: ApplicationConfig = {
     }),
     provideAnimationsAsync(),
     provideHttpClient(
-      withInterceptors([keyInterceptor]),
+      withInterceptors([apiKeyInterceptor]),
     ),
     provideState({ name: coinPricesKey, reducer: coinPricesReducer }),
     provideEffects(

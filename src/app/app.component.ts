@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, computed, DestroyRef, ElementRef, signal, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  signal,
+  ViewChild
+} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -11,22 +20,23 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { getHistoricalData } from '../store/coin-prices/coin-prices.actions';
 import {
-  selectCoinPricesIsLoading,
+  selectCoinPricesIsLoading, selectError,
   selectExchangeRates,
   selectExchangeRatesArePresent,
   selectLastExchangeRate,
 } from '../store/coin-prices/coin-prices.selectors';
 import { AsyncPipe, CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { filter, map, tap } from 'rxjs';
-import { IExchangeRate } from '../api/models/coin-api.models';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
+import { selectedPeriod } from '../configs/api-periods.config';
+import { IExchangeRate } from '../interfaces/exchange-rate.interface';
+
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-    RouterOutlet,
     MatFormField,
     MatInput,
     MatError,
@@ -37,20 +47,23 @@ import { IExchangeRate } from '../api/models/coin-api.models';
     MatCardHeader,
     MatCardTitle,
     MatCardSubtitle,
+    MatProgressSpinner,
+
+    RouterOutlet,
     ReactiveFormsModule,
     AsyncPipe,
-    MatProgressSpinner,
     DecimalPipe,
     CurrencyPipe,
     DatePipe,
   ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements AfterViewInit {
   private chart: Chart | null = null;
 
-  public displayDateFormat = 'MMM d, H:m a';
+  public displayDateFormat = 'MMM d, hh:mm:ss a';
 
   public exchangePairControl = new FormControl('BTC/USD', {
     validators: [
@@ -63,9 +76,9 @@ export class AppComponent implements AfterViewInit {
   public exchangeRatesArePresent$ = this.store.select(selectExchangeRatesArePresent);
   public lastExchangeRate$ = this.store.select(selectLastExchangeRate);
 
-  public pair = signal(this.exchangePairControl.value);
-  public currency = computed(() =>
-    this.pair().split('/')[1],
+  public exchangePair = signal(this.exchangePairControl.value);
+  public currencyCode = computed(() =>
+    this.exchangePair().split('/')[1],
   );
 
   @ViewChild('chartCanvas') public chartCanvas!: ElementRef;
@@ -74,6 +87,10 @@ export class AppComponent implements AfterViewInit {
     private store: Store,
     private destroyRef: DestroyRef,
   ) {
+    this.store.select(selectError).pipe(
+      takeUntilDestroyed(),
+      filter((error): error is string => !!error),
+    ).subscribe((error) => window.alert(error));
   }
 
   public ngAfterViewInit(): void {
@@ -85,7 +102,7 @@ export class AppComponent implements AfterViewInit {
         this.chart.destroy();
       }
 
-      this.pair.set(this.exchangePairControl.value);
+      this.exchangePair.set(this.exchangePairControl.value)
 
       this.chart = new Chart(this.chartCanvas.nativeElement, {
         options: chartConfig,
@@ -94,11 +111,12 @@ export class AppComponent implements AfterViewInit {
             {
               type: 'line',
               data: exchangeRates.map((rates) => ({
-                x: new Date(rates.time_close).valueOf(),
-                y: rates.rate_close,
+                x: new Date(rates.date).valueOf(),
+                y: rates.value,
               })),
-              backgroundColor: '#00FF00',
-              order: 1,
+              fill: false,
+              tension: 0.2,
+              borderColor: '#005cbb',
             },
           ],
         },
@@ -107,6 +125,10 @@ export class AppComponent implements AfterViewInit {
   }
 
   public subscribeForEvents(): void {
-    this.store.dispatch(getHistoricalData({ exchangePair: this.exchangePairControl.value }))
+    this.store.dispatch(
+      getHistoricalData({
+        exchangePair: this.exchangePairControl.value,
+        period: selectedPeriod,
+      }));
   }
 }

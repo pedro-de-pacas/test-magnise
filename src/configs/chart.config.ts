@@ -13,18 +13,12 @@ export const chartConfig: ChartConfiguration['options'] = {
       },
       alignToPixels: true,
       time: {
-        unit: 'minute',
-        tooltipFormat: 'yyyy-MM-dd HH:mm',
+        unit: 'second',
+        tooltipFormat: 'hh:mm:ss a',
         displayFormats: {
-          minute: 'yyyy-MM-dd HH:mm',
+          minute: 'hh:mm:ss a',
         },
-        round: 'minute',
-      },
-      ticks: {
-        source: 'data',
-        autoSkip: true,
-        autoSkipPadding: 10,
-        maxRotation: 180,
+        round: 'second',
       },
     },
     y: {

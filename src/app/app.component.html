@@ -37,19 +37,19 @@
           <div class="d-flex flex-column align-items-center">
             <mat-card-title>Symbol:</mat-card-title>
 
-            <mat-card-subtitle>{{ pair() }}</mat-card-subtitle>
+            <mat-card-subtitle>{{ exchangePair() }}</mat-card-subtitle>
           </div>
 
           <div class="d-flex flex-column align-items-center">
             <mat-card-title>Price:</mat-card-title>
 
-            <mat-card-subtitle>{{ data.lastExchangeRate?.rate_close | currency: currency() }}</mat-card-subtitle>
+            <mat-card-subtitle>{{ data.lastExchangeRate?.value | currency: currencyCode() }}</mat-card-subtitle>
           </div>
 
           <div class="d-flex flex-column align-items-center">
             <mat-card-title>Time:</mat-card-title>
 
-            <mat-card-subtitle>{{ data.lastExchangeRate?.time_close | date: displayDateFormat }}</mat-card-subtitle>
+            <mat-card-subtitle>{{ data.lastExchangeRate?.date | date: displayDateFormat }}</mat-card-subtitle>
           </div>
         </mat-card-content>
       </mat-card>
