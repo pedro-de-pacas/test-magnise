@@ -12,7 +12,7 @@
 
   <div class="container gap-5 d-flex flex-column p-5">
     <div class="d-flex align-items-center column-gap-3">
-      <mat-form-field class="w-100" subscriptSizing="dynamic">
+      <mat-form-field subscriptSizing="dynamic" class="flex-grow-1">
         <mat-label>Enter exchange pair</mat-label>
 
         <input matInput [formControl]="exchangePairControl"/>
@@ -24,6 +24,16 @@
         @if (exchangePairControl.hasError('pattern')) {
           <mat-error>Wrong format</mat-error>
         }
+      </mat-form-field>
+
+      <mat-form-field subscriptSizing="dynamic" class="flex-grow-1">
+        <mat-label>Period</mat-label>
+
+        <mat-select [formControl]="periodControl">
+          @for (key of PeriodsEnum | keyvalue: sortFunc; track key.key) {
+            <mat-option [value]="key.value">{{key.value}}</mat-option>
+          }
+        </mat-select>
       </mat-form-field>
 
       <button mat-flat-button [disabled]="exchangePairControl.invalid" (click)="subscribeForEvents()">SUBSCRIBE</button>

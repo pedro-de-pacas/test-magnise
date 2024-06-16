@@ -20,17 +20,19 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { getHistoricalData } from '../store/coin-prices/coin-prices.actions';
 import {
-  selectCoinPricesIsLoading, selectError,
+  selectCoinPricesIsLoading,
+  selectError,
   selectExchangeRates,
   selectExchangeRatesArePresent,
   selectLastExchangeRate,
 } from '../store/coin-prices/coin-prices.selectors';
-import { AsyncPipe, CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { AsyncPipe, CurrencyPipe, DatePipe, DecimalPipe, KeyValue, KeyValuePipe } from '@angular/common';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
-import { selectedPeriod } from '../configs/api-periods.config';
 import { IExchangeRate } from '../interfaces/exchange-rate.interface';
+import { MatOption, MatSelect } from '@angular/material/select';
+import { PeriodsEnum } from '../api/enum/api-periods.enum';
 
 
 @Component({
@@ -55,6 +57,9 @@ import { IExchangeRate } from '../interfaces/exchange-rate.interface';
     DecimalPipe,
     CurrencyPipe,
     DatePipe,
+    MatSelect,
+    MatOption,
+    KeyValuePipe,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -71,6 +76,10 @@ export class AppComponent implements AfterViewInit {
       Validators.pattern(/^([a-zA-z]+)\/([a-zA-z]+)$/)
     ], nonNullable: true
   });
+
+  public periodControl = new FormControl<PeriodsEnum>(
+    PeriodsEnum.MIN_1, { nonNullable: true },
+  );
 
   public isLoading$ = this.store.select(selectCoinPricesIsLoading);
   public exchangeRatesArePresent$ = this.store.select(selectExchangeRatesArePresent);
@@ -128,7 +137,19 @@ export class AppComponent implements AfterViewInit {
     this.store.dispatch(
       getHistoricalData({
         exchangePair: this.exchangePairControl.value,
-        period: selectedPeriod,
+        period: this.periodControl.value,
       }));
   }
+
+  public sortFunc = (a: KeyValue<string, PeriodsEnum>, b: KeyValue<string, PeriodsEnum>,): number => {
+    const unitA = a.value.slice(-3);
+    const numA = a.value.slice(0, -3);
+
+    const unitB = b.value.slice(-3);
+    const numB = b.value.slice(0, -3);
+
+    return ((unitB < unitA) && (numA < numB)) ? -1 : 1;
+  }
+
+  protected readonly PeriodsEnum = PeriodsEnum;
 }

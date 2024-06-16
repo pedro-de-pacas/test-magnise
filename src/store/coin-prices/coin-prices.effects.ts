@@ -10,7 +10,6 @@ import {
 import { catchError, map, Observer, of, switchMap, tap } from 'rxjs';
 import { ExchangeRateApiService } from '../../api/services/exchange-rate-api.service';
 import { CoinApiWebsocketService } from '../../api/services/coin-api-websocket.service';
-import { periodKeys } from '../../configs/api-periods.config';
 import { IWebSocketExchangeRate } from '../../api/models/coin-api.models';
 import { Store } from '@ngrx/store';
 
@@ -21,7 +20,7 @@ export const getHistoricalData$: FunctionalEffect = createEffect((
   return actions$.pipe(
     ofType(getHistoricalData),
     switchMap(({ exchangePair, period }) =>
-      exchangeRateApiServiceService.getHistoricalData(exchangePair, periodKeys[period]).pipe(
+      exchangeRateApiServiceService.getHistoricalData(exchangePair, period).pipe(
         map((data) => getHistoricalDataSuccess({
           data: data.map(({ rate_close: value, time_close: date }) => ({ value, date })),
           exchangePair, period
