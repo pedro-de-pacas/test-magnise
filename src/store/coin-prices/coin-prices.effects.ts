@@ -47,7 +47,7 @@ export const startWebsocket$: FunctionalEffect = createEffect((
     ofType(startWebsocket),
     switchMap(({ exchangePair, period }) =>
       coinApiWebsocketService.getCoinWebSocketObservable(exchangePair, period).pipe(
-        throttleTime(periodNumbers[period]! - 999),
+        throttleTime(periodNumbers[period]! - 999), // subscribe_update_limit_ms_exrate doesn't work reliably
         map((exchangeRate) => exchangeRate.message
           ? coinPricesError({ error: exchangeRate.message })
           : addRealtimeData({ exchangeRate: { date: exchangeRate.time, value: exchangeRate.rate } })
